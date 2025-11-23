@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Manager</title>
+    <title>Asset Manager</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         body {
@@ -35,31 +36,6 @@
             to {
                 transform: translateY(-1200px) scale(1.5);
                 opacity: 0;
-            }
-        }
-
-        .fish {
-            position: absolute;
-            width: 100px;
-            animation: swim 15s linear infinite;
-            z-index: 1;
-        }
-
-        @keyframes swim {
-            0% {
-                transform: translateX(-150px) scaleX(1);
-            }
-
-            50% {
-                transform: translateX(calc(100vw + 150px)) scaleX(1);
-            }
-
-            51% {
-                transform: translateX(calc(100vw + 150px)) scaleX(-1);
-            }
-
-            100% {
-                transform: translateX(-150px) scaleX(-1);
             }
         }
 
@@ -213,12 +189,98 @@
                 color: rgba(255, 255, 255, 0.7);
             }
 
+        /* FIXED DROPDOWN STYLES */
+        select.form-control {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        }
+
+            select.form-control option {
+                background: #005f9e !important;
+                color: white !important;
+                padding: 10px !important;
+            }
+
+            select.form-control:focus {
+                background: rgba(255, 255, 255, 0.2) !important;
+                color: white !important;
+            }
+
+        /* Dropdown arrow color */
+        select.form-control {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 10px center !important;
+            background-size: 16px !important;
+        }
+
         .table-striped > tbody > tr:nth-of-type(odd) {
             background-color: rgba(255, 255, 255, 0.1);
         }
 
         .table-striped > tbody > tr:nth-of-type(even) {
             background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Drag & Drop Styles */
+        .drop-zone {
+            border: 2px dashed #00bfff;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+        }
+
+            .drop-zone:hover, .drop-zone.dragover {
+                background: rgba(0, 191, 255, 0.1);
+                border-color: #ffffff;
+            }
+
+            .drop-zone i {
+                font-size: 48px;
+                color: #00bfff;
+                margin-bottom: 15px;
+            }
+
+        .file-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 5px;
+            margin: 5px;
+        }
+
+        .search-filters {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            margin-bottom: 10px;
+        }
+
+        .asset-badge {
+            background: #00bfff;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        /* Edit modal specific styles */
+        .current-file-info {
+            background: rgba(0, 191, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -242,60 +304,185 @@
         <!-- Header -->
         <div class="header">
             <div class="header-left">
-                <h2 class="inventory-title">📦 Inventory Manager</h2>
-                <input type="text" id="searchInput" class="form-control search-input" placeholder="Search by name or description...">
+                <h2 class="inventory-title">📦 Asset Manager</h2>
+                <input type="text" id="searchInput" class="form-control search-input" placeholder="Search assets...">
             </div>
-            <button class="btn btn-success" data-toggle="modal" data-target="#uploadModal">+ Upload Item</button>
+            <button class="btn btn-success" data-toggle="modal" data-target="#uploadModal">
+                <i class="fas fa-plus"></i> Upload Asset
+            </button>
         </div>
 
-        <!-- Inventory Table -->
+        <!-- Search Filters -->
+        <div class="search-filters">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Asset Type:</label>
+                        <select class="form-control" id="typeFilter">
+                            <option value="">All Types</option>
+                            <option value="image">Images</option>
+                            <option value="document">Documents</option>
+                            <option value="video">Videos</option>
+                            <option value="audio">Audio</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Date From:</label>
+                        <input type="date" class="form-control" id="dateFrom">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Date To:</label>
+                        <input type="date" class="form-control" id="dateTo">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Tags:</label>
+                        <input type="text" class="form-control" id="tagsFilter" placeholder="Filter by tags...">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assets Table -->
         <div class="table-responsive">
-            <table class="table table-bordered table-striped" id="inventoryTable">
+            <table class="table table-bordered table-striped" id="assetsTable">
                 <thead>
                     <tr>
-                        <th style="width:5%">Item ID</th>
-                        <th style="width:15%">Item Name</th>
+                        <th style="width:5%">ID</th>
+                        <th style="width:15%">Name</th>
+                        <th style="width:10%">Type</th>
                         <th style="width:10%">Quantity</th>
-                        <th style="width:15%">Date Created</th>
+                        <th style="width:15%">Date</th>
                         <th style="width:20%">Description</th>
-                        <th style="width:20%">Preview</th>
-                        <th style="width:15%">Action</th>
+                        <th style="width:15%">Preview</th>
+                        <th style="width:10%">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="inventoryBody">
-                    <!-- Items will appear here -->
+                <tbody id="assetsBody">
+                    {% if items %}
+                    {% for item in items %}
+                    <tr>
+                        <td class="text-center">{{ item.id }}</td>
+                        <td>{{ item.name }}</td>
+                        <td class="text-center">
+                            <span class="asset-badge">{{ item.asset_type|default:"other" }}</span>
+                        </td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-center">{{ item.date|date:"Y-m-d" }}</td>
+                        <td>{{ item.description }}</td>
+                        <td>
+                            <div class="preview">
+                                {% if item.file %}
+                                {% if item.asset_type == 'image' %}
+                                <img src="{{ item.file.url }}" class="file-preview" alt="{{ item.name }}">
+                                {% elif item.asset_type == 'video' %}
+                                <video controls class="file-preview">
+                                    <source src="{{ item.file.url }}" type="video/mp4">
+                                </video>
+                                {% else %}
+                                <i class="fas fa-file" style="font-size: 24px;"></i>
+                                {% endif %}
+                                {% else %}
+                                <span class="text-muted">No file</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-warning btn-xs action-btn editBtn" data-id="{{ item.id }}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-xs action-btn deleteBtn" data-id="{{ item.id }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% if item.file %}
+                            <button class="btn btn-info btn-xs action-btn downloadBtn" data-id="{{ item.id }}">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">No assets found</td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Upload Modal -->
+    <!-- Upload Modal with Drag & Drop -->
     <div id="uploadModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Upload Item</h4>
+                    <h4 class="modal-title">Upload Asset</h4>
                 </div>
                 <div class="modal-body">
-                    <form id="inventoryForm">
-                        <div class="form-group">
-                            <label for="itemName">Item Name:</label>
-                            <input type="text" class="form-control" id="itemName" required>
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Drag & Drop Zone -->
+                        <div class="drop-zone" id="dropZone">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h4>Drag & Drop files here</h4>
+                            <p>or click to select files</p>
+                            <input type="file" id="fileInput" name="file" style="display: none;" accept="*/*">
+                            <div id="filePreview" class="mt-3"></div>
                         </div>
-                        <div class="form-group">
-                            <label for="itemQuantity">Quantity:</label>
-                            <input type="number" class="form-control" id="itemQuantity" min="1" required>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Asset Name:</label>
+                                    <input type="text" class="form-control" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Asset Type:</label>
+                                    <select class="form-control" name="asset_type">
+                                        <option value="image">Image</option>
+                                        <option value="document">Document</option>
+                                        <option value="video">Video</option>
+                                        <option value="audio">Audio</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="itemDescription">Description:</label>
-                            <textarea class="form-control" id="itemDescription" rows="3"></textarea>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Quantity:</label>
+                                    <input type="number" class="form-control" name="quantity" value="1" min="1">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Tags (comma separated):</label>
+                                    <input type="text" class="form-control" name="tags" placeholder="tag1, tag2, tag3">
+                                </div>
+                            </div>
                         </div>
+
                         <div class="form-group">
-                            <label for="itemFiles">Upload Files:</label>
-                            <input type="file" class="form-control" id="itemFiles" multiple accept="image/*,video/*,.pdf,.doc,.docx">
+                            <label>Description:</label>
+                            <textarea class="form-control" name="description" rows="3" placeholder="Asset description..."></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block">Upload</button>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-upload"></i> Upload Asset
+                        </button>
                     </form>
                 </div>
             </div>
@@ -304,28 +491,73 @@
 
     <!-- Edit Modal -->
     <div id="editModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Edit Item</h4>
+                    <h4 class="modal-title">Edit Asset</h4>
                 </div>
                 <div class="modal-body">
-                    <form id="editForm">
-                        <input type="hidden" id="editIndex">
-                        <div class="form-group">
-                            <label for="editName">Item Name:</label>
-                            <input type="text" class="form-control" id="editName" required>
+                    <form id="editForm" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" id="editId" name="id">
+
+                        <div class="current-file-info">
+                            <h5>Current File Information</h5>
+                            <p id="currentFileName">File: <span id="fileNameText"></span></p>
+                            <p id="currentFileType">Type: <span id="fileTypeText"></span></p>
                         </div>
-                        <div class="form-group">
-                            <label for="editQuantity">Quantity:</label>
-                            <input type="number" class="form-control" id="editQuantity" min="1" required>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Asset Name:</label>
+                                    <input type="text" class="form-control" id="editName" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Asset Type:</label>
+                                    <select class="form-control" id="editType" name="asset_type">
+                                        <option value="image">Image</option>
+                                        <option value="document">Document</option>
+                                        <option value="video">Video</option>
+                                        <option value="audio">Audio</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="editDescription">Description:</label>
-                            <textarea class="form-control" id="editDescription" rows="3"></textarea>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Quantity:</label>
+                                    <input type="number" class="form-control" id="editQuantity" name="quantity" value="1" min="1">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Tags (comma separated):</label>
+                                    <input type="text" class="form-control" id="editTags" name="tags" placeholder="tag1, tag2, tag3">
+                                </div>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+
+                        <div class="form-group">
+                            <label>Description:</label>
+                            <textarea class="form-control" id="editDescription" name="description" rows="3" placeholder="Asset description..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Replace File (optional):</label>
+                            <input type="file" class="form-control" name="file" accept="*/*">
+                            <small class="text-muted">Leave empty to keep the current file</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
                     </form>
                 </div>
             </div>
@@ -337,136 +569,201 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
     <script>
-        const inventoryForm = document.getElementById('inventoryForm');
-        const inventoryBody = document.getElementById('inventoryBody');
-        const searchInput = document.getElementById('searchInput');
-        const editForm = document.getElementById('editForm');
+        // Drag & Drop functionality
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
 
-        let inventoryData = []; // store all items
+        dropZone.addEventListener('click', () => fileInput.click());
 
-        // Upload new item
-        inventoryForm.addEventListener('submit', function (e) {
+        dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-
-            const itemName = document.getElementById('itemName').value.trim();
-            const itemQuantity = document.getElementById('itemQuantity').value.trim();
-            const itemDescription = document.getElementById('itemDescription').value.trim();
-            const itemFiles = document.getElementById('itemFiles').files;
-
-            if (!itemName || itemFiles.length === 0) {
-                alert("Please provide an item name and at least one file.");
-                return;
-            }
-
-            const previews = [];
-            for (let file of itemFiles) {
-                const fileType = file.type;
-                let previewHTML = "";
-                if (fileType.startsWith('image/')) {
-                    previewHTML = `<img src="${URL.createObjectURL(file)}">`;
-                } else if (fileType.startsWith('video/')) {
-                    previewHTML = `<video src="${URL.createObjectURL(file)}" controls></video>`;
-                } else {
-                    previewHTML = `<a href="${URL.createObjectURL(file)}" target="_blank">${file.name}</a>`;
-                }
-                previews.push(previewHTML);
-            }
-
-            const dateCreated = new Date().toLocaleDateString();
-
-            const item = {
-                name: itemName,
-                quantity: itemQuantity,
-                description: itemDescription,
-                previews: previews.join(" "),
-                dateCreated: dateCreated
-            };
-
-            inventoryData.push(item);
-            renderTable();
-
-            inventoryForm.reset();
-            $('#uploadModal').modal('hide');
+            dropZone.classList.add('dragover');
         });
 
-        // Render the table
-        function renderTable() {
-            inventoryBody.innerHTML = '';
-            inventoryData.forEach((item, index) => {
-                const row = document.createElement('tr');
-                row.setAttribute('data-name', item.name.toLowerCase());
-                row.setAttribute('data-description', item.description.toLowerCase());
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
 
-                row.innerHTML = `
-                            <td class="text-center">${index + 1}</td> <!-- Item ID -->
-                            <td>${item.name}</td>
-                            <td class="text-center">${item.quantity}</td>
-                            <td class="text-center">${item.dateCreated}</td>
-                            <td>${item.description}</td>
-                            <td><div class="preview">${item.previews}</div></td>
-                            <td class="text-center">
-                                <button class="btn btn-warning btn-xs action-btn editBtn" data-index="${index}">Edit</button>
-                                <button class="btn btn-danger btn-xs action-btn deleteBtn" data-index="${index}">Delete</button>
-                            </td>
-                        `;
-                inventoryBody.appendChild(row);
-            });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            filePreview.innerHTML = '';
+            const fileElement = document.createElement('div');
+            fileElement.className = 'alert alert-info';
+            fileElement.innerHTML = `
+                <strong>Selected file:</strong> ${file.name}<br>
+                <small>Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+            `;
+            filePreview.appendChild(fileElement);
         }
 
-        // Search function
-        searchInput.addEventListener('input', function () {
-            const searchValue = searchInput.value.toLowerCase();
-            const rows = inventoryBody.querySelectorAll('tr');
+        // Upload form handling
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
 
-            rows.forEach(row => {
-                const name = row.getAttribute('data-name');
-                const description = row.getAttribute('data-description');
-                row.style.display = name.includes(searchValue) || description.includes(searchValue) ? '' : 'none';
+            fetch('/upload/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    $('#uploadModal').modal('hide');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Upload error: ' + error);
             });
         });
 
-        // Handle Edit button click
-        $(document).on('click', '.editBtn', function () {
-            const index = $(this).data('index');
-            const item = inventoryData[index];
+        // Edit functionality
+        $(document).on('click', '.editBtn', function() {
+            const itemId = $(this).data('id');
+            const row = $(this).closest('tr');
 
-            $('#editIndex').val(index);
-            $('#editName').val(item.name);
-            $('#editQuantity').val(item.quantity);
-            $('#editDescription').val(item.description);
+            // Get data from the row
+            const name = row.find('td:eq(1)').text();
+            const type = row.find('td:eq(2) .asset-badge').text().trim();
+            const quantity = row.find('td:eq(3)').text();
+            const description = row.find('td:eq(5)').text();
 
+            // Get file info
+            const preview = row.find('.preview');
+            let fileName = "No file";
+            if (preview.find('img').length > 0) {
+                fileName = preview.find('img').attr('alt') || "Image file";
+            } else if (preview.find('video').length > 0) {
+                fileName = "Video file";
+            } else if (preview.find('.fa-file').length > 0) {
+                fileName = "Document file";
+            }
+
+            // Populate the edit form
+            $('#editId').val(itemId);
+            $('#editName').val(name);
+            $('#editQuantity').val(quantity);
+            $('#editDescription').val(description);
+            $('#fileNameText').text(fileName);
+            $('#fileTypeText').text(type);
+
+            // Set the selected option in dropdown - FIXED
+            $('#editType').val(type.toLowerCase());
+
+            // If the current type doesn't match any option, set to 'other'
+            if (!$('#editType').val()) {
+                $('#editType').val('other');
+            }
+
+            // Show the edit modal
             $('#editModal').modal('show');
         });
 
-        // Handle Edit Form submission
-        editForm.addEventListener('submit', function (e) {
+        // Edit form submission
+        document.getElementById('editForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            const formData = new FormData(this);
 
-            const index = parseInt(document.getElementById('editIndex').value);
-            const newName = document.getElementById('editName').value.trim();
-            const newQuantity = document.getElementById('editQuantity').value.trim();
-            const newDescription = document.getElementById('editDescription').value.trim();
-
-            if (!newName) {
-                alert("Item name cannot be empty.");
-                return;
-            }
-
-            inventoryData[index].name = newName;
-            inventoryData[index].quantity = newQuantity;
-            inventoryData[index].description = newDescription;
-
-            renderTable();
-            $('#editModal').modal('hide');
+            fetch('/edit/' + $('#editId').val() + '/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    $('#editModal').modal('hide');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Edit error: ' + error);
+            });
         });
 
-        // Handle Delete button click
-        $(document).on('click', '.deleteBtn', function () {
-            const index = $(this).data('index');
-            if (confirm("Are you sure you want to delete this item?")) {
-                inventoryData.splice(index, 1);
-                renderTable();
+        // Search and filter functionality
+        function applyFilters() {
+            const searchText = $('#searchInput').val().toLowerCase();
+            const typeFilter = $('#typeFilter').val();
+            const dateFrom = $('#dateFrom').val();
+            const dateTo = $('#dateTo').val();
+            const tagsFilter = $('#tagsFilter').val().toLowerCase();
+
+            $('#assetsBody tr').each(function() {
+                const $row = $(this);
+                const name = $row.find('td:eq(1)').text().toLowerCase();
+                const type = $row.find('td:eq(2)').text().toLowerCase();
+                const date = $row.find('td:eq(4)').text();
+                const description = $row.find('td:eq(5)').text().toLowerCase();
+
+                const matchesSearch = name.includes(searchText) || description.includes(searchText);
+                const matchesType = !typeFilter || type.includes(typeFilter);
+                const matchesDate = (!dateFrom || date >= dateFrom) && (!dateTo || date <= dateTo);
+
+                $row.toggle(matchesSearch && matchesType && matchesDate);
+            });
+        }
+
+        $('#searchInput, #typeFilter, #dateFrom, #dateTo, #tagsFilter').on('input change', applyFilters);
+
+        // Delete functionality
+        $(document).on('click', '.deleteBtn', function() {
+            const itemId = $(this).data('id');
+            const itemName = $(this).closest('tr').find('td:eq(1)').text();
+
+            if (confirm(`Delete "${itemName}"?`)) {
+                const formData = new FormData();
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                fetch('/delete/' + itemId + '/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                });
             }
+        });
+
+        $(document).on('click', '.downloadBtn', function() {
+            const itemId = $(this).data('id');
+            window.open('/download/' + itemId + '/', '_blank');
         });
     </script>
 
