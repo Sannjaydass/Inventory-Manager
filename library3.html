@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Manager</title>
+    <title>Inventory Manager - View Mode</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         body {
@@ -38,31 +39,6 @@
             }
         }
 
-        .fish {
-            position: absolute;
-            width: 100px;
-            animation: swim 15s linear infinite;
-            z-index: 1;
-        }
-
-        @keyframes swim {
-            0% {
-                transform: translateX(-150px) scaleX(1);
-            }
-
-            50% {
-                transform: translateX(calc(100vw + 150px)) scaleX(1);
-            }
-
-            51% {
-                transform: translateX(calc(100vw + 150px)) scaleX(-1);
-            }
-
-            100% {
-                transform: translateX(-150px) scaleX(-1);
-            }
-        }
-
         .octopus {
             position: absolute;
             bottom: 50px;
@@ -85,6 +61,7 @@
         .container {
             position: relative;
             z-index: 10;
+            padding: 20px;
         }
 
         .header {
@@ -112,6 +89,8 @@
             border-radius: 20px;
             overflow: hidden;
             border: none;
+            width: 100%;
+            table-layout: fixed;
         }
 
         th {
@@ -120,79 +99,121 @@
             text-align: center;
             border: none;
             font-weight: 600;
+            padding: 12px 8px;
         }
 
         td {
             vertical-align: middle !important;
             border-color: rgba(255, 255, 255, 0.2);
             color: white;
+            padding: 10px 8px;
+            text-align: center;
+            word-wrap: break-word;
+            overflow: hidden;
         }
 
-        .preview img, .preview video {
-            max-width: 100px;
-            border-radius: 5px;
-            margin: 5px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            /* FIXED TABLE COLUMN WIDTHS */
+            th:nth-child(1), td:nth-child(1) {
+                width: 8%;
+            }
+            /* ID */
+            th:nth-child(2), td:nth-child(2) {
+                width: 20%;
+                text-align: left;
+            }
+            /* Name */
+            th:nth-child(3), td:nth-child(3) {
+                width: 10%;
+            }
+            /* Type */
+            th:nth-child(4), td:nth-child(4) {
+                width: 10%;
+            }
+            /* Quantity */
+            th:nth-child(5), td:nth-child(5) {
+                width: 12%;
+            }
+            /* Date */
+            th:nth-child(6), td:nth-child(6) {
+                width: 30%;
+                text-align: left;
+            }
+            /* Description */
+            th:nth-child(7), td:nth-child(7) {
+                width: 10%;
+            }
+        /* Preview */
+
+        /* IMPROVED PREVIEW STYLES */
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 80px;
+            margin: 0 auto;
+            gap: 5px;
+        }
+
+        .file-preview {
+            max-width: 70px;
+            max-height: 50px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            object-fit: cover;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px;
+        }
+
+        .file-icon-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .file-icon {
+            font-size: 24px;
+            color: #00bfff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .file-type-badge {
+            background: rgba(0, 191, 255, 0.3);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .no-file-placeholder {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 11px;
+            font-style: italic;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
         }
 
         .inventory-title {
             color: white;
             font-weight: bold;
             text-shadow: 0 0 10px rgba(0, 191, 255, 0.7);
+            margin: 0;
         }
 
-        .action-btn {
-            margin: 0 3px;
-        }
-
-        .btn-success {
-            background-color: #00bfff;
-            border-color: #0088cc;
-            border-radius: 10px;
-        }
-
-            .btn-success:hover {
-                background-color: #0088cc;
-                border-color: #006699;
-            }
-
-        .btn-primary {
-            background-color: #00bfff;
-            border-color: #0088cc;
-            border-radius: 10px;
-        }
-
-            .btn-primary:hover {
-                background-color: #0088cc;
-                border-color: #006699;
-            }
-
-        .btn-warning {
-            background-color: #ffa500;
-            border-color: #cc8400;
-            border-radius: 10px;
-        }
-
-        .btn-danger {
-            background-color: #ff6b6b;
-            border-color: #ff5252;
-            border-radius: 10px;
-        }
-
-        .modal-content {
-            background: linear-gradient(to bottom, #005f9e, #001f3f);
+        .viewer-badge {
+            background: #28a745;
             color: white;
+            padding: 8px 15px;
             border-radius: 20px;
-            border: none;
-        }
-
-        .modal-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .close {
-            color: white;
-            opacity: 0.8;
+            font-size: 14px;
+            font-weight: bold;
         }
 
         .form-control {
@@ -202,23 +223,55 @@
             border-radius: 10px;
         }
 
-            .form-control:focus {
-                background: rgba(255, 255, 255, 0.2);
-                border-color: #00bfff;
-                color: white;
-                box-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
-            }
-
-            .form-control::placeholder {
-                color: rgba(255, 255, 255, 0.7);
-            }
-
         .table-striped > tbody > tr:nth-of-type(odd) {
             background-color: rgba(255, 255, 255, 0.1);
         }
 
         .table-striped > tbody > tr:nth-of-type(even) {
             background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .asset-badge {
+            background: #00bfff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            display: inline-block;
+        }
+
+        /* Auto-refresh notification */
+        .refresh-notice {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Responsive fixes */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .preview-container {
+                height: 60px;
+            }
+
+            .file-preview {
+                max-width: 50px;
+                max-height: 40px;
+            }
+
+            .file-icon {
+                font-size: 18px;
+                padding: 6px;
+            }
         }
     </style>
 </head>
@@ -243,9 +296,14 @@
         <div class="header">
             <div class="header-left">
                 <h2 class="inventory-title">📦 Inventory Manager</h2>
+                <span class="viewer-badge">View Mode</span>
                 <input type="text" id="searchInput" class="form-control search-input" placeholder="Search by name or description...">
             </div>
-            <button class="btn btn-success" data-toggle="modal" data-target="#uploadModal">+ Upload Item</button>
+        </div>
+
+        <!-- Auto-refresh notice -->
+        <div class="refresh-notice">
+            <i class="fas fa-sync-alt"></i> Auto-refreshing every 10 seconds to show latest changes
         </div>
 
         <!-- Inventory Table -->
@@ -253,82 +311,72 @@
             <table class="table table-bordered table-striped" id="inventoryTable">
                 <thead>
                     <tr>
-                        <th style="width:5%">Item ID</th>
-                        <th style="width:15%">Item Name</th>
-                        <th style="width:10%">Quantity</th>
-                        <th style="width:15%">Date Created</th>
-                        <th style="width:20%">Description</th>
-                        <th style="width:20%">Preview</th>
-                        <th style="width:15%">Action</th>
+                        <th>Item ID</th>
+                        <th>Item Name</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Date Created</th>
+                        <th>Description</th>
+                        <th>Preview</th>
                     </tr>
                 </thead>
                 <tbody id="inventoryBody">
-                    <!-- Items will appear here -->
+                    <!-- Django template to display database items -->
+                    {% if items %}
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>
+                            <span class="asset-badge">{{ item.asset_type|default:"other" }}</span>
+                        </td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.date|date:"Y-m-d" }}</td>
+                        <td>{{ item.description }}</td>
+                        <td>
+                            <div class="preview-container">
+                                {% if item.file %}
+                                {% if item.asset_type == 'image' %}
+                                <img src="{{ item.file.url }}" class="file-preview" alt="{{ item.name }}">
+                                <span class="file-type-badge">Image</span>
+                                {% elif item.asset_type == 'video' %}
+                                <div class="video-preview">
+                                    <video class="file-preview">
+                                        <source src="{{ item.file.url }}" type="video/mp4">
+                                    </video>
+                                    <i class="fas fa-play video-icon"></i>
+                                </div>
+                                <span class="file-type-badge">Video</span>
+                                {% elif item.asset_type == 'document' %}
+                                <div class="file-icon-container">
+                                    <i class="fas fa-file-pdf file-icon"></i>
+                                    <span class="file-type-badge">Document</span>
+                                </div>
+                                {% elif item.asset_type == 'audio' %}
+                                <div class="file-icon-container">
+                                    <i class="fas fa-music file-icon"></i>
+                                    <span class="file-type-badge">Audio</span>
+                                </div>
+                                {% else %}
+                                <div class="file-icon-container">
+                                    <i class="fas fa-file file-icon"></i>
+                                    <span class="file-type-badge">File</span>
+                                </div>
+                                {% endif %}
+                                {% else %}
+                                <div class="no-file-placeholder">No file</div>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">No items found in inventory</td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
-        </div>
-    </div>
-
-    <!-- Upload Modal -->
-    <div id="uploadModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Upload Item</h4>
-                </div>
-                <div class="modal-body">
-                    <form id="inventoryForm">
-                        <div class="form-group">
-                            <label for="itemName">Item Name:</label>
-                            <input type="text" class="form-control" id="itemName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="itemQuantity">Quantity:</label>
-                            <input type="number" class="form-control" id="itemQuantity" min="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="itemDescription">Description:</label>
-                            <textarea class="form-control" id="itemDescription" rows="3"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="itemFiles">Upload Files:</label>
-                            <input type="file" class="form-control" id="itemFiles" multiple accept="image/*,video/*,.pdf,.doc,.docx">
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">Upload</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Modal -->
-    <div id="editModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Edit Item</h4>
-                </div>
-                <div class="modal-body">
-                    <form id="editForm">
-                        <input type="hidden" id="editIndex">
-                        <div class="form-group">
-                            <label for="editName">Item Name:</label>
-                            <input type="text" class="form-control" id="editName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editQuantity">Quantity:</label>
-                            <input type="number" class="form-control" id="editQuantity" min="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="editDescription">Description:</label>
-                            <textarea class="form-control" id="editDescription" rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
-                    </form>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -337,127 +385,35 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
     <script>
-        const inventoryForm = document.getElementById('inventoryForm');
-        const inventoryBody = document.getElementById('inventoryBody');
-        const searchInput = document.getElementById('searchInput');
-        const editForm = document.getElementById('editForm');
-
-        let inventoryData = []; // store all items
-
-        // Upload new item
-        inventoryForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const itemName = document.getElementById('itemName').value.trim();
-            const itemQuantity = document.getElementById('itemQuantity').value.trim();
-            const itemDescription = document.getElementById('itemDescription').value.trim();
-            const itemFiles = document.getElementById('itemFiles').files;
-
-            if (!itemName || itemFiles.length === 0) {
-                alert("Please provide an item name and at least one file.");
-                return;
-            }
-
-            const previews = [];
-            for (let file of itemFiles) {
-                const fileType = file.type;
-                let previewHTML = "";
-                if (fileType.startsWith('image/')) {
-                    previewHTML = `<img src="${URL.createObjectURL(file)}">`;
-                } else if (fileType.startsWith('video/')) {
-                    previewHTML = `<video src="${URL.createObjectURL(file)}" controls></video>`;
-                } else {
-                    previewHTML = `<a href="${URL.createObjectURL(file)}" target="_blank">${file.name}</a>`;
-                }
-                previews.push(previewHTML);
-            }
-
-            const dateCreated = new Date().toLocaleDateString();
-
-            const item = {
-                name: itemName,
-                quantity: itemQuantity,
-                description: itemDescription,
-                previews: previews.join(" "),
-                dateCreated: dateCreated
-            };
-
-            inventoryData.push(item);
-            renderTable();
-
-            inventoryForm.reset();
-            $('#uploadModal').modal('hide');
-        });
-
-        // Render the table
-        function renderTable() {
-            inventoryBody.innerHTML = '';
-            inventoryData.forEach((item, index) => {
-                const row = document.createElement('tr');
-                row.setAttribute('data-name', item.name.toLowerCase());
-                row.setAttribute('data-description', item.description.toLowerCase());
-
-                row.innerHTML = `
-                            <td class="text-center">${index + 1}</td> <!-- Item ID -->
-                            <td>${item.name}</td>
-                            <td class="text-center">${item.quantity}</td>
-                            <td class="text-center">${item.dateCreated}</td>
-                            <td>${item.description}</td>
-                            <td><div class="preview">${item.previews}</div></td>
-                            <td class="text-center">
-                                <button class="btn btn-warning btn-xs action-btn editBtn" data-index="${index}">Edit</button>
-                            </td>
-                        `;
-                inventoryBody.appendChild(row);
-            });
-        }
-
         // Search function
-        searchInput.addEventListener('input', function () {
-            const searchValue = searchInput.value.toLowerCase();
-            const rows = inventoryBody.querySelectorAll('tr');
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#inventoryBody tr');
 
             rows.forEach(row => {
-                const name = row.getAttribute('data-name');
-                const description = row.getAttribute('data-description');
+                const name = row.cells[1].textContent.toLowerCase();
+                const description = row.cells[5].textContent.toLowerCase();
                 row.style.display = name.includes(searchValue) || description.includes(searchValue) ? '' : 'none';
             });
         });
 
-        // Handle Edit button click
-        $(document).on('click', '.editBtn', function () {
-            const index = $(this).data('index');
-            const item = inventoryData[index];
+        // Auto-refresh every 10 seconds to show latest changes from editor
+        setInterval(function () {
+            location.reload();
+        }, 10000); // 10 seconds
 
-            $('#editIndex').val(index);
-            $('#editName').val(item.name);
-            $('#editQuantity').val(item.quantity);
-            $('#editDescription').val(item.description);
+        // Optional: Show refresh notification
+        let lastRefresh = new Date();
+        setInterval(function () {
+            const now = new Date();
+            const secondsSinceRefresh = Math.floor((now - lastRefresh) / 1000);
+            const timeUntilNextRefresh = 10 - (secondsSinceRefresh % 10);
 
-            $('#editModal').modal('show');
-        });
-
-        // Handle Edit Form submission
-        editForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const index = parseInt(document.getElementById('editIndex').value);
-            const newName = document.getElementById('editName').value.trim();
-            const newQuantity = document.getElementById('editQuantity').value.trim();
-            const newDescription = document.getElementById('editDescription').value.trim();
-
-            if (!newName) {
-                alert("Item name cannot be empty.");
-                return;
+            if (timeUntilNextRefresh <= 3) {
+                document.querySelector('.refresh-notice').innerHTML =
+                    `<i class="fas fa-sync-alt"></i> Refreshing in ${timeUntilNextRefresh} seconds...`;
             }
-
-            inventoryData[index].name = newName;
-            inventoryData[index].quantity = newQuantity;
-            inventoryData[index].description = newDescription;
-
-            renderTable();
-            $('#editModal').modal('hide');
-        });
+        }, 1000);
     </script>
 
 </body>
